@@ -51,31 +51,30 @@ Data preparation
 ```{r}
 
 # Propensity scores
-a.hat <- predict(psmodel, type = 'response', newdata = nhefs.nmv)
+pi.hat <- predict(psmodel, type = 'response', newdata = nhefs.nmv)
 
 # Outcome model predictions
 nhefs.0 <- nhefs.nmv
 nhefs.0$qsmk <- 0
 nhefs.1 <- nhefs.nmv
 nhefs.1$qsmk <- 1
-y.hat.0<-predict(outcome_model,newdata = nhefs.0)
-y.hat.1<-predict(outcome_model,newdata = nhefs.1)
+b.hat.0<- predict(outcome_model,newdata = nhefs.0)
+b.hat.1<- predict(outcome_model,newdata = nhefs.1)
 
 # Renaming variables for convenience
 a<-nhefs.nmv$qsmk
 y<-nhefs.nmv$wt82_71
 ```
 
-Estimation
+Estimation based on formulas in slide 164.
 
 ```{r}
+e.hat.1 <-(a*y/pi.hat - (a/pi.hat-1)*b.hat.1)
+e.hat.0 <- (1-a)*y/(1-pi.hat) - ((1-a)/(1-pi.hat)-1)*b.hat.0
+e.hat <-e.hat.1-e.hat.0
+beta.hat<-mean(e.hat)
 
-Psi1<-(a*y/a.hat - (a-a.hat)/a.hat*y.hat.1)
-Psi0<-((1-a)*y/(1-a.hat) + (a-a.hat)/(1-a.hat)*y.hat.0)
-Psi<-Psi1-Psi0
-beta.hat<-mean(Psi)
-
-var.beta.hat<-var(Psi)/nrow(nhefs)
+var.beta.hat<-var(e.hat)/nrow(nhefs)
 
 cat(paste0("ATE estimate:", round(beta.hat, 4), '\n'))
 

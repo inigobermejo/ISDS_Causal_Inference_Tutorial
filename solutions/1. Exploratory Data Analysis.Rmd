@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 The NHEFS dataset is used in the Hernan and Robins book [1]. The acronym that stands for National Health and Nutrition Examination Survey Data I Epidemiologic Follow-up Study. We will use this dataset to estimate the effect of smoking cessation on weight gain.
 
-The codebook of the dataset can be found [here](https://www.hsph.harvard.edu/miguel-hernan/wp-content/uploads/sites/1268/2012/10/NHEFS_Codebook.xls). A detailed description of the NHEFS, can be found at <http://wwwn.cdc.gov/nchs/nhanes/nhefs/>.
+The codebook of the dataset can be found in the data folder of the repository (NHEFS_Codebook.xls). A detailed description of the NHEFS, can be found at <http://wwwn.cdc.gov/nchs/nhanes/nhefs/>.
 
 ## Loading the dataset into R
 
@@ -40,8 +40,12 @@ And focus on the important ones
 -   **sex**: 0: male 1: female
 -   **smokeintensity**: Increase in number of cigarettes/day between 1971 and 1982
 -   **smokeyrs**: Years of smoking
+-   **exercise**: 0:much exercise,1:moderate exercise,2:little or no exercise
+-   **active**: 0:very active, 1:moderately active, 2:inactive
+-   **race**: 0: white 1: black or other in 1971
 -   **wt71**: Weight in kilograms in 1971
 -   **wt82**: Weight in kilograms in 1982
+-   **wt82_71**: Weight change in kilograms
 
 ## Summary statistics
 

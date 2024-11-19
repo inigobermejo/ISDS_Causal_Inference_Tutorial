@@ -23,7 +23,7 @@ mean(nhefs.nmv$wt82_71)
 
 ```
 
-Then, we will calculate the average change in those who stopped smoking and those who did
+Then, we will calculate the average change in those who stopped smoking and those who did not.
 
 ```{r}
 

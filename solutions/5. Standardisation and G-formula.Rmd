@@ -66,6 +66,11 @@ std <- glm(
 )
 summary(std)
 ```
+Use the model to predict outcome for observations with treatment set to 0 (interv=0) and to 1 (interv=1)
+
+```{r}
+onesample$predicted_Y <- predict(std, newdata = onesample)
+```
 
 
 
@@ -73,11 +78,11 @@ Estimate mean outcome in each of the groups interv=0, and interv=1
 This mean outcome is a weighted average of the mean outcomes in each combination
 of values of treatment and confounders, that is, the standardized outcome
 ```{r}
-original     <- mean(onesample[which(onesample$interv == -1), ]$predicted_meanY)
+original     <- mean(onesample[which(onesample$interv == -1), ]$predicted_Y)
 
-none_treated <- mean(onesample[which(onesample$interv == 0), ]$predicted_meanY)
+none_treated <- mean(onesample[which(onesample$interv == 0), ]$predicted_Y)
 
-all_treated  <- mean(onesample[which(onesample$interv == 1), ]$predicted_meanY)
+all_treated  <- mean(onesample[which(onesample$interv == 1), ]$predicted_Y)
 
 cat(paste0("Predicted weight gain in original dataset:     " , round(original, 4), "\n"))
 cat(paste0("Predicted weight gain if no one quits smoking: " , round(none_treated, 4), "\n"))
@@ -119,15 +124,15 @@ standardisation <- function(data, indices) {
     data = d.onesample
   )
 
-  d.onesample$predicted_meanY <- predict(fit, d.onesample)
+  d.onesample$predicted_Y <- predict(fit, d.onesample)
 
   # estimate mean outcome in each of the groups interv=-1, interv=0, and interv=1
   return(c(
-    mean(d.onesample$predicted_meanY[d.onesample$interv == -1]),
-    mean(d.onesample$predicted_meanY[d.onesample$interv == 0]),
-    mean(d.onesample$predicted_meanY[d.onesample$interv == 1]),
-    mean(d.onesample$predicted_meanY[d.onesample$interv == 1]) -
-      mean(d.onesample$predicted_meanY[d.onesample$interv == 0])
+    mean(d.onesample$predicted_Y[d.onesample$interv == -1]),
+    mean(d.onesample$predicted_Y[d.onesample$interv == 0]),
+    mean(d.onesample$predicted_Y[d.onesample$interv == 1]),
+    mean(d.onesample$predicted_Y[d.onesample$interv == 1]) -
+      mean(d.onesample$predicted_Y[d.onesample$interv == 0])
   ))
 }
 

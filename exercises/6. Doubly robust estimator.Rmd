@@ -52,8 +52,8 @@ nhefs.0 <- nhefs.nmv
 nhefs.0$qsmk <- 0
 nhefs.1 <- nhefs.nmv
 nhefs.1$qsmk <- 1
-y.hat.0<- ### MISSING CODE HERE
-y.hat.1<- ### MISSING CODE HERE
+b.hat.0<- ### MISSING CODE HERE
+b.hat.1<- ### MISSING CODE HERE
 
 # Renaming variables for convenience
 a<-nhefs.nmv$qsmk
@@ -64,8 +64,8 @@ Estimation
 
 ```{r}
 
-e.hat.1 <-(a*y/pi.hat - (a-pi.hat)/pi.hat*y.hat.1)
-e.hat.0 <-### MISSING CODE HERE
+e.hat.1 <-(a*y/pi.hat - (a/pi.hat-1)*b.hat.1)
+e.hat.0 <- ### MISSING CODE HERE
 e.hat <-e.hat.1-e.hat.0
 beta.hat<-mean(e.hat)
 

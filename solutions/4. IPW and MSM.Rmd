@@ -36,6 +36,8 @@ p.qsmk.obs <-
   ifelse(nhefs.nmv$qsmk == 0,
          1 - predict(fit, type = "response"),
          predict(fit, type = "response"))
+
+summary(p.qsmk.obs)
 ```
 
 Finally, calculate the inverse of the probability:
