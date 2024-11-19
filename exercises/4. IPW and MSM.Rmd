@@ -1,0 +1,85 @@
+---
+title: "4. IPW and MSM"
+author: "Inigo Bermejo"
+date: "2024-11-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Inverse probability weighting (IPW) and Marginal Structural Models (MSM)
+
+## Estimation of IP weights via a logistic model
+
+First, fit the model to estimate the probability of treatment:
+
+```{r}
+fit <- glm(
+   ### MISSING CODE HERE
+  family = binomial(),
+  data = nhefs.nmv
+)
+summary(fit)
+```
+
+Next, calculate the weights.
+
+First, assign probability of being treated or not being treated, depending on the observed treatment allocation
+
+```{r}
+p.qsmk.obs <-### MISSING CODE HERE
+```
+
+Finally, calculate the inverse of the probability:
+
+```{r}
+nhefs.nmv$w <- ### MISSING CODE HERE
+summary(nhefs.nmv$w)
+sd(nhefs.nmv$w)
+```
+
+## Apply the weights and fit the marginal structural model
+
+Using the 'geepack' package
+
+```{r}
+# install.packages("geepack") # install package if required
+library("geepack")
+msm.w <- geeglm(
+  wt82_71 ~ qsmk,
+  data = nhefs.nmv,
+  weights = ### MISSING CODE HERE,
+  id = seqn,
+  corstr = "independence"
+)
+summary(msm.w)
+
+```
+
+Calculate confidence interval
+
+```{r}
+beta <- coef(msm.w)
+SE <- coef(summary(msm.w))[, 2]
+lcl <- beta - qnorm(0.975) * SE
+ucl <- beta + qnorm(0.975) * SE
+cbind(beta, lcl, ucl)
+
+```
+
+Using the 'survey' package
+
+```{r}
+
+library(survey)
+
+weighteddata <- svydesign(ids= ~ 1, data=nhefs.nmv, weights = ~ ### MISSING CODE HERE
+                            )
+
+msm <- (svyglm(wt82_71 ~ qsmk, design= weighteddata))
+
+coef(msm)
+confint(msm)
+```

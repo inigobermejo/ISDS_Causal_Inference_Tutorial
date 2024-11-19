@@ -1,0 +1,95 @@
+---
+title: "1. Exploratory data analysis"
+author: "Inigo Bermejo"
+date: "2024-11-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Exploring the NHEFS dataset
+
+## Background
+
+The NHEFS dataset is used in the Hernan and Robins book [1]. The acronym that stands for National Health and Nutrition Examination Survey Data I Epidemiologic Follow-up Study. We will use this dataset to estimate the effect of smoking cessation on weight gain.
+
+The codebook of the dataset can be found [here](https://www.hsph.harvard.edu/miguel-hernan/wp-content/uploads/sites/1268/2012/10/NHEFS_Codebook.xls). A detailed description of the NHEFS, can be found at <http://wwwn.cdc.gov/nchs/nhanes/nhefs/>.
+
+## Loading the dataset into R
+
+Let us load the dataset into R using the read.csv function.
+
+```{r}
+nhefs <- read.csv("..\\data\\NHEFS.csv")
+```
+
+## Exploring the variables
+
+Let us print the available variables:
+
+```{r}
+colnames(nhefs)
+```
+
+And focus on the important ones
+
+-   **qsmk**: Quit smoking between 1st questionnaire and 1982, 1:yes, 0:no
+-   **age**: age in 1971
+-   **sex**: 0: male 1: female
+-   **smokeintensity**: Increase in number of cigarettes/day between 1971 and 1982
+-   **smokeyrs**: Years of smoking
+-   **wt71**: Weight in kilograms in 1971
+-   **wt82**: Weight in kilograms in 1982
+
+## Summary statistics
+
+First thing, we will print the summary statistics of the key variables:
+
+```{r}
+# provisionally ignore subjects with missing values for weight in 1982
+nhefs.nmv <- nhefs[which(!is.na(nhefs$wt82)),]
+
+# Summary
+cat("Age:\n")
+summary(nhefs.nmv$age)
+cat("Gender distribution (%):")
+round(prop.table(table(nhefs.nmv$sex))*100,1)
+cat("Weight on 71:\n")
+summary(nhefs.nmv$wt71)
+cat("Increase in number of cigarrettes / day:\n")
+summary(nhefs.nmv$smokeintensity)
+cat("Years of smoking:\n")
+summary(nhefs.nmv$smokeyrs)
+```
+
+## Bivariate analyses
+
+Now let us look at the interplay between some variable pairs:
+
+```{r}
+cat("qsmk vs sex:")
+table(nhefs.nmv$qsmk, nhefs.nmv$sex)
+round(prop.table(table(nhefs.nmv$qsmk, nhefs.nmv$sex), 1), 2)
+
+cat("\nqsmk vs race:")
+table(nhefs.nmv$qsmk, nhefs.nmv$race)
+round(prop.table(table(nhefs.nmv$qsmk, nhefs.nmv$race), 1), 2)
+
+cat("\nqsmk vs education:")
+table(nhefs.nmv$qsmk, nhefs.nmv$education)
+round(prop.table(table(nhefs.nmv$qsmk, nhefs.nmv$education), 1), 2)
+
+cat("\nqsmk vs exercise:")
+table(nhefs.nmv$qsmk, nhefs.nmv$exercise)
+round(prop.table(table(nhefs.nmv$qsmk, nhefs.nmv$exercise), 1), 2)
+
+cat("\nqsmk vs active:")
+table(nhefs.nmv$qsmk, nhefs.nmv$active)
+round(prop.table(table(nhefs.nmv$qsmk, nhefs.nmv$active), 1), 2)
+```
+
+## References
+
+1.  Hernán MA, Robins JM (2020). Causal Inference: What If. Boca Raton: Chapman & Hall/CRC.

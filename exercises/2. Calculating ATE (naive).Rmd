@@ -1,0 +1,45 @@
+---
+title: "2. Calculating ATE (naive)"
+author: "Inigo Bermejo"
+date: "2024-11-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Calculating ATE (naive)
+
+We will start estimating ATE following a naive approach, assuming no confounding.
+
+We will calculate the difference between those who stopped smoking and those who did not.
+
+First, we calculate the average change in weight for the total population
+
+```{r}
+
+mean(nhefs.nmv$wt82_71)
+
+```
+
+Then, we will calculate the average change in those who stopped smoking and those who did
+
+```{r}
+
+### MISSING CODE HERE
+```
+
+The naive ATE is the difference between the two:
+
+```{r}
+### MISSING CODE HERE
+```
+
+We can get the same result fitting a linear model:
+
+```{r}
+
+### MISSING CODE HERE
+
+```

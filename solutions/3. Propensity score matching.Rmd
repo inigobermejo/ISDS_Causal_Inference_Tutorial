@@ -1,0 +1,110 @@
+---
+title: "3. Propensity score matching"
+author: "Inigo Bermejo"
+date: "2024-11-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 3. Propensity score matching
+
+## Setup
+
+Install and load required packages:
+
+```{r}
+library(tableone)
+library(Matching)
+library(MatchIt)
+
+```
+
+## Predictor imbalance
+
+```{r}
+xvars <- c("sex", "race", "age", "education", "smokeintensity", "smokeyrs", "exercise", "active")
+
+table1 <- CreateTableOne(vars=xvars, data= nhefs.nmv, strata="qsmk", test = FALSE)
+
+print(table1, smd=TRUE)
+
+```
+
+## Propensity score model
+
+Fit the propensity score model
+
+```{r}
+psmodel <- glm(
+  qsmk ~ sex + race + age + I(age ^ 2) +
+    as.factor(education) + smokeintensity +
+    I(smokeintensity ^ 2) + smokeyrs + I(smokeyrs ^ 2) +
+    as.factor(exercise) + as.factor(active) + wt71 + I(wt71 ^ 2),
+  family = binomial(),
+  data = nhefs.nmv)
+
+summary(psmodel)
+
+```
+
+## Assign propensity scores to data
+
+```{r}
+
+pscore <- psmodel$fitted.values
+
+summary(pscore)
+
+```
+
+## Match samples based on propensity score
+
+```{r}
+
+psmatch <- Match(Tr=nhefs.nmv$qsmk, M=1, X=pscore, replace = FALSE)
+
+matched <- nhefs.nmv[unlist(psmatch[c("index.treated", "index.control")]),]
+
+cat(paste0('Matched pairs:', nrow(matched), '\n'))
+```
+
+Check the matched table:
+
+```{r}
+matchedtab1 <- CreateTableOne(vars= xvars, strata="qsmk", data=matched, test = FALSE)
+
+print(matchedtab1, smd=TRUE)
+
+```
+
+## Use a caliper 
+
+Sometimes we do not want to force all the samples to be paired. In those cases, we use a caliper to set the maximum distance that is acceptable for each match.
+
+```{r}
+psmatch <- Match(Tr=nhefs.nmv$qsmk, M=1, X=pscore, replace = FALSE, caliper = 0.1)
+
+matched <- nhefs.nmv[unlist(psmatch[c("index.treated", "index.control")]),]
+
+cat(paste0('Matched pairs:', nrow(matched), '\n'))
+
+matchedtab1 <- CreateTableOne(vars= xvars, strata="qsmk", data=matched, test = FALSE)
+
+print(matchedtab1, smd=TRUE)
+
+```
+
+## Estimate ATE
+
+```{r}
+mean(matched$wt82_71[matched$qsmk == 1]) - mean(matched$wt82_71[matched$qsmk == 0])
+```
+
+## Using PS in regression as coefficient
+
+```{r}
+summary(glm(wt82_71 ~ qsmk + pscore, data = nhefs.nmv))
+```

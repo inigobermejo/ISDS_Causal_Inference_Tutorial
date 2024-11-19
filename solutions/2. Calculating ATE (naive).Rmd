@@ -1,0 +1,52 @@
+---
+title: "2. Calculating ATE (naive)"
+author: "Inigo Bermejo"
+date: "2024-11-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Calculating ATE (naive)
+
+We will start estimating ATE following a naive approach, assuming no confounding.
+
+We will calculate the difference between those who stopped smoking and those who did not.
+
+First, we calculate the average change in weight for the total population
+
+```{r}
+
+mean(nhefs.nmv$wt82_71)
+
+```
+
+Then, we will calculate the average change in those who stopped smoking and those who did
+
+```{r}
+
+wt82_71_qsmk_0 <- mean(nhefs.nmv$wt82_71[nhefs.nmv$qsmk == 0])
+
+wt82_71_qsmk_1 <- mean(nhefs.nmv$wt82_71[nhefs.nmv$qsmk == 1])
+
+cat(paste0('Weight gain (quit smoking = no): ', 
+           round(wt82_71_qsmk_0, 4),'\n', 
+           'Weight gain (quit smoking = yes): ', 
+           round(wt82_71_qsmk_1, 4),'\n'))
+
+```
+
+The naive ATE is the difference between the two:
+
+```{r}
+cat(paste0("Naive ATE estimation: ", round(wt82_71_qsmk_1 - wt82_71_qsmk_0, 3), '\n'))
+```
+
+We can reach the same result fitting a linear model:
+
+```{r}
+
+summary(glm(wt82_71 ~ qsmk, data = nhefs.nmv))
+```

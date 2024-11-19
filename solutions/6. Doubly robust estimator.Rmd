@@ -1,0 +1,82 @@
+---
+title: "6. Doubly robust estimator"
+author: "Inigo Bermejo"
+date: "2024-11-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 6. Doubly robust estimator
+
+We have seen that the doubly robust (DR) estimator is unbiased for the ATE if at least one of the models (i.e. the outcome model or the propensity score model) are correctly specified. Moreover If both models are correctly specified, the DR estimator is semiparametrically efficient.
+
+## Fit the propensity score model
+
+```{r}
+psmodel <- glm(
+  qsmk ~ sex + race + age + I(age ^ 2) +
+    as.factor(education) + smokeintensity +
+    I(smokeintensity ^ 2) + smokeyrs + I(smokeyrs ^ 2) +
+    as.factor(exercise) + as.factor(active) + wt71 + I(wt71 ^ 2),
+  family = binomial(),
+  data = nhefs.nmv)
+
+summary(psmodel)
+```
+
+## Fit the outcome model
+
+```{r}
+nhefs$cens <- ifelse(is.na(nhefs$wt82), 1, 0)
+
+outcome_model <-
+  glm(
+    wt82_71 ~ qsmk + sex + race + age + I(age * age) + as.factor(education)
+    + smokeintensity + I(smokeintensity * smokeintensity) + smokeyrs
+    + I(smokeyrs * smokeyrs) + as.factor(exercise) + as.factor(active)
+    + wt71 + I(wt71 * wt71) + qsmk * smokeintensity,
+    data = nhefs
+  )
+summary(outcome_model)
+
+```
+
+## Doubly robust estimation
+
+Data preparation
+
+```{r}
+
+# Propensity scores
+a.hat <- predict(psmodel, type = 'response', newdata = nhefs.nmv)
+
+# Outcome model predictions
+nhefs.0 <- nhefs.nmv
+nhefs.0$qsmk <- 0
+nhefs.1 <- nhefs.nmv
+nhefs.1$qsmk <- 1
+y.hat.0<-predict(outcome_model,newdata = nhefs.0)
+y.hat.1<-predict(outcome_model,newdata = nhefs.1)
+
+# Renaming variables for convenience
+a<-nhefs.nmv$qsmk
+y<-nhefs.nmv$wt82_71
+```
+
+Estimation
+
+```{r}
+
+Psi1<-(a*y/a.hat - (a-a.hat)/a.hat*y.hat.1)
+Psi0<-((1-a)*y/(1-a.hat) + (a-a.hat)/(1-a.hat)*y.hat.0)
+Psi<-Psi1-Psi0
+beta.hat<-mean(Psi)
+
+var.beta.hat<-var(Psi)/nrow(nhefs)
+
+cat(paste0("ATE estimate:", round(beta.hat, 4), '\n'))
+
+```

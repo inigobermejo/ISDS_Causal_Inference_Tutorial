@@ -1,0 +1,76 @@
+---
+title: "6. Doubly robust estimator"
+author: "Inigo Bermejo"
+date: "2024-11-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 6. Doubly robust estimator
+
+We have seen that the doubly robust (DR) estimator is unbiased for the ATE if at least one of the models (i.e. the outcome model or the propensity score model) are correctly specified. Moreover If both models are correctly specified, the DR estimator is semiparametrically efficient.
+
+## Fit the propensity score model
+
+```{r}
+psmodel <- glm(
+### MISSING CODE HERE
+  family = binomial(),
+  data = nhefs.nmv)
+
+summary(psmodel)
+```
+
+## Fit the outcome model
+
+```{r}
+nhefs$cens <- ifelse(is.na(nhefs$wt82), 1, 0)
+
+outcome_model <-
+  glm(
+    ### MISSING CODE HERE
+    data = nhefs
+  )
+summary(outcome_model)
+
+```
+
+## Doubly robust estimation
+
+Data preparation
+
+```{r}
+
+# Propensity scores
+pi.hat <- ### MISSING CODE HERE
+
+# Outcome model predictions
+nhefs.0 <- nhefs.nmv
+nhefs.0$qsmk <- 0
+nhefs.1 <- nhefs.nmv
+nhefs.1$qsmk <- 1
+y.hat.0<- ### MISSING CODE HERE
+y.hat.1<- ### MISSING CODE HERE
+
+# Renaming variables for convenience
+a<-nhefs.nmv$qsmk
+y<-nhefs.nmv$wt82_71
+```
+
+Estimation
+
+```{r}
+
+e.hat.1 <-(a*y/pi.hat - (a-pi.hat)/pi.hat*y.hat.1)
+e.hat.0 <-### MISSING CODE HERE
+e.hat <-e.hat.1-e.hat.0
+beta.hat<-mean(e.hat)
+
+var.beta.hat<-var(e.hat)/nrow(nhefs)
+
+cat(paste0("ATE estimate:", round(beta.hat, 4), '\n'))
+
+```
